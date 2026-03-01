@@ -35,20 +35,30 @@ def main():
         print("Incorrect number of clusters!")
         sys.exit(1)
     #if goal isnt symnmf,send information to C
-    if(goal != "symnmf"):
-        final_matrix=symnmf.fitx(points, k,n, goal)
+    if(goal == "sym"):
+        #senfing to C sym()
+        final_matrix=sym(points, k,n, goal)
+   
+    elif(goal == "ddg"):
+        #senfing to C ddg()
+        final_matrix=ddg(points, k,n, goal)
     
-    #if goal is symnmf, preform full symnmf algorithm (except H calculation) in C
-    if(goal == "symnmf"):
+    elif(goal == "norm"):
+        #sending to C norm()
+        final_matrix=norm(points, k,n, goal)
+   
+    elif(goal == "symnmf"):
         A=similarity_matrix(points,k,n)
-       
+        
         D=diagonal_degree_matrix(A,n)
        
         W=weight_matrix(D,A,n)
         
         start_H=initial_H(W,n,k)
-        #sending W,start_H,n,k,goal to C and getting final_H from C
-        final_matrix=symnmf.fitH(W,start_H,n,k,goal)
+        #sending to C symnmf()
+        final_matrix=symnmf(W,start_H,n,k,goal)
+    
+    
     #print matrix according to the format
     print_matrix(final_matrix)   
     sys.exit(0)
