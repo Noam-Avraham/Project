@@ -62,7 +62,11 @@ void get_matrix(vector* head_vec, int rows, int cols, double **matrix) {
 void print_matrix(double *matrix, int rows, int cols) {
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-            printf("%.4f ", matrix[i * cols + j]);
+            if (j == cols - 1) {
+                printf("%.4f", matrix[i * cols + j]);
+            } else {
+                printf("%.4f, ", matrix[i * cols + j]);
+            }
         }
         printf("\n");
     }
@@ -127,18 +131,57 @@ void compute_norm(double *matrix, int rows, int cols, double *degree_matrix, dou
 }
 
 
-int symnmf(double *matrix, int rows, int cols, double **W, double **H) {
-    // Implement the logic for symmetric non-negative matrix factorization
-    
-    return 0; // Return 0 on success, non-zero on failure
-}
 
+void compute_symnmf(int n, int k, double *W, double *H) {
+    // Implement the logic for symmetric non-negative matrix factorization
+    int iter, i, j, it, l;
+    double epsilon;
+    
+    iter = 300; /* defualt value */
+    epsilon= 0.001;
+
+    for(it = 0; it < iter; it++) {
+        double sum_diff = 0.0;
+        for(i = 0; i < n; i++) {
+            for(j = 0; j < k; j++) {
+                double old_val = H[i * n + j];
+                double numerator = 0.0;
+                double denominator = 0.0;
+                for(l = 0; l < n; l++) {
+                    // Calculate numerator = W * H:
+                    numerator += W[i * n + l] * H[l * n + j];
+                    
+                    // Calculate denominator = H * H^T * H:
+                    double tempW = 0.0;
+                    for(int m = 0; m < k; m++) {
+                        tempW += H[i * n + m] * H[l * n + m];
+                    }
+
+                    denominator += tempW * H[l * n + j];
+                }
+                
+                if(denominator > 0) {
+                    H[i * n + j] = old_val * (1 - 0.5 + 0.5 * (numerator / denominator));
+                } else {
+                    // Not expected to happen, but in case of zero denominator, we can keep the old value or set it to a small positive number
+                    H[i * n + j] = old_val;
+                }
+                double temp_diff = H[i * n + j] - old_val;
+                sum_diff += temp_diff * temp_diff;
+                
+            }
+        }
+        if(sum_diff < epsilon) {
+            break;
+        }
+    }
+
+}
 
 
 int main(int argc, char *argv[])
 {   /* input reading. */
-    int iter;
-    double epsilon;
+
     double max_changed;
     double *matrixA, *matrixD, *matrixW;
      vector* next_vec;
@@ -166,8 +209,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    iter = 300; /* defualt value */
-    epsilon= 0.001;
+
     
 
     head_cord = safe_malloc(sizeof( cord));
