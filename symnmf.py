@@ -95,9 +95,9 @@ def weight_matrix(D,A):
 def print_matrix(matrix):
     for row in matrix:
         st=[]
-		for x in range(len(row)):
-			st.append('{0:.4f}'.format(row[x]))
-		print(','.join(st))
+        for x in range(len(row)):
+            st.append('{0:.4f}'.format(row[x]))
+        print(','.join(st))
 
 def initial_H(W,n,k):
     W_np = np.array(W)

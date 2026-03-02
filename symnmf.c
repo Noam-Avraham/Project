@@ -59,6 +59,16 @@ void get_matrix(vector* head_vec, int rows, int cols, double **matrix) {
 }
 
 
+void print_matrix(double *matrix, int rows, int cols) {
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            printf("%.4f ", matrix[i * cols + j]);
+        }
+        printf("\n");
+    }
+}
+
+
 // Calculate norma 2:
 double Euclidean_distance(vector* vec1, vector* vec2, int cols) {
     cord* cord1 = vec1->cords;
@@ -73,7 +83,7 @@ double Euclidean_distance(vector* vec1, vector* vec2, int cols) {
     return sqrt(sum);
 }
 
-void sym(double *matrix, int rows, int cols, vector *head_vec){
+void compute_similarity(double *matrix, int rows, int cols, vector *head_vec){
     //  Calculate and output the similarity matrix
     vector* current_vecI = head_vec;
     for(int i=0; i<rows; i++){
@@ -91,7 +101,7 @@ void sym(double *matrix, int rows, int cols, vector *head_vec){
     }
 }
 
-void ddg(double *matrix, int rows, int cols, double *similarity_matrix){
+void compute_ddg(double *matrix, int rows, int cols, double *similarity_matrix){
     // Calculate and output the degree matrix
     for(int i=0; i<rows; i++){
         double sum = 0.0;
@@ -103,7 +113,7 @@ void ddg(double *matrix, int rows, int cols, double *similarity_matrix){
     }
 }
 
-void norm(double *matrix, int rows, int cols, double *degree_matrix, double *similarity_matrix){
+void compute_norm(double *matrix, int rows, int cols, double *degree_matrix, double *similarity_matrix){
     // Calculate and output the normalized similarity matrix
     for(int i=0; i<rows; i++){
         for(int j=0; j<cols; j++){
@@ -130,9 +140,9 @@ int main(int argc, char *argv[])
     int iter;
     double epsilon;
     double max_changed;
-    double *matrixA;
+    double *matrixA, *matrixD, *matrixW;
      vector* next_vec;
-    char* goal, file_name;
+    char* goal, *file_name;
     /* inputfile reader from std_in */
     /* creating points */
      vector *head_vec, *curr_vec;
@@ -201,6 +211,31 @@ int main(int argc, char *argv[])
     }
     fclose(input_file);
     matrixA = safe_malloc(rows * cols * sizeof(double));
+    // logic for the different goals
+    if (goal[0] == 's' && goal[1] == 'y' && goal[2] == 'm' && goal[3] == 'n') {
+        compute_similarity(&matrixA[0], rows, cols, head_vec);
+        print_matrix(matrixA, rows, cols);
+    }
+    else if (goal[0] == 'd' && goal[1] == 'd' && goal[2] == 'g') {
+        matrixD = safe_malloc(rows * cols * sizeof(double));
+        compute_similarity(&matrixA[0], rows, cols, head_vec);
+        compute_ddg(matrixD, rows, cols, matrixA);
+        print_matrix(matrixD, rows, cols);
+    }
+    else if (goal[0] == 'n' && goal[1] == 'o' && goal[2] == 'r' && goal[3] == 'm') {
+        matrixD = safe_malloc(rows * cols * sizeof(double));
+        matrixW = safe_malloc(rows * cols * sizeof(double));
+        compute_similarity(matrixA, rows, cols, head_vec);
+        compute_ddg(matrixD, rows, cols, matrixA);
+        compute_norm(matrixW, rows, cols, matrixD, matrixA);
+        print_matrix(matrixW, rows, cols);
+    }
+    else{
+        fprintf(stderr, "Error: Invalid goal %s\n", goal);
+        return 1;
+    }
+
+    
     
     /* free memory */
     curr_vec = head_vec;
@@ -211,5 +246,10 @@ int main(int argc, char *argv[])
         curr_vec = next_vec;
     }
     free(curr_vec);
+    free(matrixA);
+    free(matrixD);
+    free(matrixW);
+    free(head_vec);
+    free(head_cord);
     return 0;
 }
