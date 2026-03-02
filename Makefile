@@ -1,26 +1,14 @@
-# Makefile for building the C module and other components
 
-# Compiler and flags
 CC = gcc
-CFLAGS = -Wall -Wextra -O2
+CFLAGS = -ansi -Wall -Wextra -Werror -pedantic-errors
 
-# Sources and objects for the C module
-CSRC = symnmf.c
-COBJ = $(CSRC:.c=.o)
 
-# Default target
-all: module
+all: symnmf
 
-# Build the C module
-module: $(COBJ)
-	$(CC) $(CFLAGS) -shared -o libsymnmf.so $(COBJ)
+symnmf: symnmf.o
+	$(CC) $(CFLAGS) symnmf.o -o symnmf -lm
 
-# Pattern rule for compiling C sources
-%.o: %.c
-	$(CC) $(CFLAGS) -fPIC -c $< -o $@
+symnmf.o: symnmf.c symnmf.h
+	$(CC) $(CFLAGS) -c symnmf.c
 
-# Clean up build artifacts
-clean:
-	rm -f $(COBJ) libsymnmf.so
 
-.PHONY: all module clean
