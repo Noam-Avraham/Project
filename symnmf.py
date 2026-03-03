@@ -24,7 +24,7 @@ def main():
         sys.exit(1)
 	
     file_name = sys.argv[3]
-    points = read_points()
+    points = read_points(file_name)
 
 	if not points:
 		print("An Error Has Occurred")
@@ -111,11 +111,15 @@ def initial_H(W,n,k):
 #     return np.sqrt(np.sum((point1 - point2) ** 2))
 
 #read all data points.
-def read_points():
-	#pts is list of list of floats
-	points = []
-	all_input = sys.stdin.read().strip()
-	lines=all_input.splitlines()
+def read_points(file_name):
+    # pts is list of list of floats
+    points = []
+    try:
+        with open(file_name, 'r') as f:
+            lines = f.read().strip().splitlines()
+    except Exception:
+        print("An Error Has Occurred")
+        sys.exit(1)
 
 	for line in lines:
 		if not line.strip():
@@ -133,9 +137,8 @@ def read_points():
 			current_point.append(coard_float)
 		points.append(current_point)
 
-	return points
+    return points
 	
-
 
 if __name__ == "__main__":
     main()
