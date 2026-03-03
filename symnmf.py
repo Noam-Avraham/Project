@@ -25,7 +25,10 @@ def main():
 	
     file_name = sys.argv[3]
     points = read_points(file_name)
-
+    
+    main_function(points, k, goal)
+# diffrent function that can be used by analysis.py to get the H matrix.
+def main_function(points, k, goal):
 	if not points:
 		print("An Error Has Occurred")
 		sys.exit(1)

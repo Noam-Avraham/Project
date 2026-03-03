@@ -100,10 +100,13 @@ def read_points():
 
 	return points
 
-#main function
-def kmeans(k: int, max_iters: int):
+#readin points from file, and run kmeans, return the final clusters
+def fit(k: int, max_iters: int):
 	epsilon = 0.001
 	points = read_points()
+	kmeans(k,epsilon,max_iters,points)
+#running kmeans with the given parameters, return the final clusters (for use of analysis.py)
+def kmeans(k: int,epsilon: float,max_iters: int,points):
 	if not points:
 		print("An Error Has Occurred")
 		sys.exit(1)
@@ -126,6 +129,7 @@ def kmeans(k: int, max_iters: int):
 	if(max_iters<=1 or max_iters>=800):
 		print("Incorrect maximum iteration!")
 		sys.exit(1)
+		
 	#clusters are the first k points
 	clusters = points[:k]
 	#initialize clusters_sum and clusters_count,updating happens in updated_points
@@ -163,6 +167,6 @@ if __name__ == '__main__':
 	else:
 		max_iters = 400
 	
-	kmeans(k, max_iters)
+	fit(k, max_iters)
 
 	sys.exit(0)
