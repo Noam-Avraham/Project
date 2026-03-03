@@ -287,7 +287,6 @@ int main(int argc, char *argv[])
         free_vector(curr_vec);
         curr_vec = next_vec;
     }
-    free(curr_vec);
     free(matrixA);
     free(matrixD);
     free(matrixW);

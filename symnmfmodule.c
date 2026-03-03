@@ -24,12 +24,11 @@ void matrix_to_points(double *matrix, vector *head_vec, int rows, int cols) {
             curr_cord->next = new_cord;
             curr_cord = new_cord;
         }
-        if(i < rows - 1) {
-            vector *new_vec = (vector*)safe_malloc(sizeof(vector));
-            new_vec->next = NULL;
-            curr_vec->next = new_vec;
-            curr_vec = new_vec;
-        }
+
+        vector *new_vec = (vector*)safe_malloc(sizeof(vector));
+        new_vec->next = NULL;
+        curr_vec->next = new_vec;
+        curr_vec = new_vec;
     }
 }
 
@@ -57,28 +56,6 @@ void parse_points(vector *head_vec, int* n, int* dim) {
     /*Turn points matrix to vector*/
     matrix_to_points(&points[0][0], head_vec, n, dim);
     
-
-    if (goal[0] == 's' && goal[1] == 'y' && goal[2] == 'm' && goal[3] == 'n') {
-    }
-    else if (goal[0] == 'd' && goal[1] == 'd' && goal[2] == 'g') {
-        matrixD = safe_malloc(n * dim * sizeof(double));
-        compute_similarity(&points[0][0], n, dim, head_vec);
-        compute_ddg(matrixD, n, dim, points);
-        free(matrixD);
-    }
-    else if (goal[0] == 'n' && goal[1] == 'o' && goal[2] == 'r' && goal[3] == 'm') {
-        matrixD = safe_malloc(n * dim * sizeof(double));
-        matrixW = safe_malloc(n * dim * sizeof(double));
-        compute_similarity(&points[0][0], n, dim, head_vec);
-        compute_ddg(matrixD, n, dim, points);
-        compute_norm(matrixW, n, dim, matrixD, points);
-        free(matrixW);
-        free(matrixD);
-    }
-    else{
-        fprintf(stderr, "Error: Invalid goal %s\n", goal);
-        return 1;
-    }
         
 }
 
@@ -120,6 +97,15 @@ PyObject* metrix_to_python(double *matrix, int rows, int cols) {
     return py_result;
 }
 
+void free_points(vector *head_vec) {
+    vector *curr_vec = head_vec;
+    while (curr_vec != NULL) {
+        vector *next_vec = curr_vec->next;
+        free_vector(curr_vec);
+        curr_vec = next_vec;
+    }
+}
+
 
 static PyObject* sym(PyObject* self, PyObject* args) {
     // Parse the input arguments from Python
@@ -135,6 +121,7 @@ static PyObject* sym(PyObject* self, PyObject* args) {
 
     py_result = metrix_to_python(&matrixA[0], n, n);
     free(matrixA);
+    free_points(head_vec);
     return py_result;
 }
 
@@ -154,6 +141,7 @@ static PyObject* ddg(PyObject* self, PyObject* args) {
     py_result = metrix_to_python(&matrixD[0], n, n);
     free(matrixD);
     free(matrixA);
+    free_points(head_vec);
     return py_result;
 }
 
@@ -176,6 +164,7 @@ static PyObject* norm(PyObject* self, PyObject* args) {
     free(matrixW);
     free(matrixD);
     free(matrixA);
+    free_points(head_vec);
     return py_result;
 }
 
