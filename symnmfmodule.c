@@ -15,7 +15,7 @@ void matrix_to_points(double *matrix, vector *head_vec, int rows, int cols) {
     int i, j;
     for(i = 0; i < rows; i++) {
         cord *curr_cord = (cord*)safe_malloc(sizeof(cord));
-        curr_cord->value = matrix[i * cols + 0];
+        curr_cord->value = matrix[i * cols];
         curr_cord->next = NULL;
         curr_vec->cords = curr_cord;
         for(j = 1; j < cols; j++) {
@@ -61,8 +61,8 @@ void parse_points(vector *head_vec, int* n, int* dim) {
         
 }
 
-// Get the matrix from the input file and store it in a linked list representation
-// Currently not used.
+/* Get the matrix from the input file and store it in a linked list representation */
+/* Currently not used. */
 void parse_matrix(vector *head_vec, int* rows, int* cols) {
     /**parse the input from python */
     PyObject *matrix_obj;
@@ -112,14 +112,14 @@ void free_points(vector *head_vec) {
 
 
 static PyObject* sym(PyObject* self, PyObject* args) {
-    // Parse the input arguments from Python
+    /* Parse the input arguments from Python */
     int n, dim;
     double* matrixA;
     PyObject *py_result;
     vector *head_vec = (vector*)safe_malloc(sizeof(vector));
     head_vec->next = NULL;
     parse_points(head_vec, &n, &dim);
-    // Call the sym function and return the result to Python
+    /* Call the sym function and return the result to Python */
     matrixA = safe_malloc(n * n * sizeof(double));
     compute_similarity(&matrixA[0], n, dim, head_vec);
 
@@ -130,18 +130,18 @@ static PyObject* sym(PyObject* self, PyObject* args) {
 }
 
 static PyObject* ddg(PyObject* self, PyObject* args) {
-    // Parse the input arguments from Python
+    /* Parse the input arguments from Python */
     int n, dim;
     double* matrixD, *matrixA;
     PyObject *py_result;
     vector *head_vec = (vector*)safe_malloc(sizeof(vector));
     head_vec->next = NULL;
     parse_points(head_vec, &n, &dim);
-    // Call the ddg function and return the result to Python
+    /* Call the ddg function and return the result to Python */
     matrixA = safe_malloc(n * n * sizeof(double));
     compute_similarity(&matrixA[0], n, dim, head_vec);
     matrixD = safe_malloc(n * n * sizeof(double));
-    compute_ddg(matrixD, n, dim, matrixA);
+    compute_ddg(matrixD, n, n, matrixA);
     py_result = metrix_to_python(&matrixD[0], n, n);
     free(matrixD);
     free(matrixA);
@@ -150,20 +150,20 @@ static PyObject* ddg(PyObject* self, PyObject* args) {
 }
 
 static PyObject* norm(PyObject* self, PyObject* args) {
-    // Parse the input arguments from Python
+    /* Parse the input arguments from Python */
     int n, dim;
     double* matrixD, *matrixA, *matrixW;
     PyObject *py_result;
     vector *head_vec = (vector*)safe_malloc(sizeof(vector));
     head_vec->next = NULL;
     parse_points(head_vec, &n, &dim);
-    // Call the symnmf function and return the result to Python
+    /* Call the symnmf function and return the result to Python */
     matrixA = safe_malloc(n * n * sizeof(double));
     compute_similarity(&matrixA[0], n, dim, head_vec);
     matrixD = safe_malloc(n * n * sizeof(double));
-    compute_ddg(matrixD, n, dim, matrixA);
+    compute_ddg(matrixD, n, n, matrixA);
     matrixW = safe_malloc(n * n * sizeof(double));
-    compute_norm(matrixW, n, dim, matrixD, matrixA);
+    compute_norm(matrixW, n, n, matrixD, matrixA);
     py_result = metrix_to_python(&matrixW[0], n, n);
     free(matrixW);
     free(matrixD);
@@ -175,7 +175,7 @@ static PyObject* norm(PyObject* self, PyObject* args) {
 
 
 static PyObject* symnf(PyObject* self, PyObject* args) {
-    // Parse the input arguments from Python
+    /* Parse the input arguments from Python */
     int n, k, i, j;
     double *matrixH, *matrixW;
     PyObject *py_result;
@@ -185,7 +185,7 @@ static PyObject* symnf(PyObject* self, PyObject* args) {
     matrixH = safe_malloc(n * k * sizeof(double));
     matrixW = safe_malloc(n * n * sizeof(double));
 
-    // insert python inputs to matricies:
+    /* insert python inputs to matricies: */
     for(i = 0; i < n; i++) {
         for(j = 0; j < k; j++) {
             PyObject* value =  PyList_GetItem(matrixH, i * k + j);
@@ -200,7 +200,7 @@ static PyObject* symnf(PyObject* self, PyObject* args) {
     }
 
 
-    // Call the symnmf function and return the result to Python
+    /* Call the symnmf function and return the result to Python */
     compute_symnmf(n, k, &matrixW[0], &matrixH[0]);
     py_result = metrix_to_python(&matrixH[0], n, k);
     
@@ -208,7 +208,7 @@ static PyObject* symnf(PyObject* self, PyObject* args) {
     free(matrixH);
 
 
-    return py_result; // Return the Python object containing the result matrix
+    return py_result; /* Return the Python object containing the result matrix */
 }
 
 
@@ -217,14 +217,14 @@ static PyMethodDef SymNMFMethods[] = {
     {"ddg", (PyCFunction)ddg, METH_VARARGS, PyDoc_STR("Calculate the degree matrix.")},
     {"norm", (PyCFunction)norm, METH_VARARGS, PyDoc_STR("Calculate the normalized similarity matrix.")},
     {"symnf", (PyCFunction)symnf, METH_VARARGS, PyDoc_STR("Perform symmetric non-negative matrix factorization.")},
-    {NULL, NULL, 0, NULL} // Sentinel
+    {NULL, NULL, 0, NULL} /* Sentinel */
 };
 
 static struct PyModuleDef symnmfmodule = {
     PyModuleDef_HEAD_INIT,
-    "symnmf", // name of module
-    NULL, // module documentation, may be NULL
-    -1, // size of per-interpreter state of the module, or -1 if the module keeps state in global variables.
+    "symnmf", /* name of module */
+    NULL, /* module documentation, may be NULL */
+    -1, /* size of per-interpreter state of the module, or -1 if the module keeps state in global  */variables.
     SymNMFMethods
 };
 
