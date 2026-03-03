@@ -12,12 +12,13 @@ static PyObject* symnf(PyObject* self, PyObject* args);
 
 void matrix_to_points(double *matrix, vector *head_vec, int rows, int cols) {
     vector *curr_vec = head_vec;
-    for(int i = 0; i < rows; i++) {
+    int i, j;
+    for(i = 0; i < rows; i++) {
         cord *curr_cord = (cord*)safe_malloc(sizeof(cord));
         curr_cord->value = matrix[i * cols + 0];
         curr_cord->next = NULL;
         curr_vec->cords = curr_cord;
-        for(int j = 1; j < cols; j++) {
+        for(j = 1; j < cols; j++) {
             cord *new_cord = (cord*)safe_malloc(sizeof(cord));
             new_cord->value = matrix[i * cols + j];
             new_cord->next = NULL;
@@ -37,13 +38,14 @@ void parse_points(vector *head_vec, int* n, int* dim) {
     /**parse the input from python */
     PyObject *points_obj;
     int n,dim, i,j;
+    double** points;
 
     if(!PyArg_ParseTuple(args, "Oii", &points_obj, &dim, &n)) {
         return NULL;
     }
 
     /**initalize points to python.points */
-    double** points = (double**)safe_malloc(n * sizeof(double*));
+    points = (double**)safe_malloc(n * sizeof(double*));
     for(i = 0; i < n; i++) {
         points[i] = (double*)safe_malloc(dim * sizeof(double));
         PyObject* point = PyList_GetItem(points_obj, i);
@@ -65,13 +67,14 @@ void parse_matrix(vector *head_vec, int* rows, int* cols) {
     /**parse the input from python */
     PyObject *matrix_obj;
     int rows,cols, i,j;
+    double** matrix;
 
     if(!PyArg_ParseTuple(args, "Oii", &matrix_obj, &rows, &cols)) {
         return NULL;
     }
 
     /**initalize points to python.points */
-    double** matrix = (double**)safe_malloc(rows * sizeof(double*));
+    matrix = (double**)safe_malloc(rows * sizeof(double*));
     for(i = 0; i < rows; i++) {
         matrix[i] = (double*)safe_malloc(cols * sizeof(double));
         PyObject* row = PyList_GetItem(matrix_obj, i);
@@ -87,9 +90,10 @@ void parse_matrix(vector *head_vec, int* rows, int* cols) {
 
 PyObject* metrix_to_python(double *matrix, int rows, int cols) {
     PyObject* py_result = PyList_New(rows);
-    for (int i = 0; i < rows; i++) {
+    int i, j;
+    for (i = 0; i < rows; i++) {
         PyObject* py_row = PyList_New(cols);
-        for (int j = 0; j < cols; j++) {
+        for (j = 0; j < cols; j++) {
             PyList_SetItem(py_row, j, PyFloat_FromDouble(matrix[i * cols + j]));
         }
         PyList_SetItem(py_result, i, py_row);
@@ -172,7 +176,7 @@ static PyObject* norm(PyObject* self, PyObject* args) {
 
 static PyObject* symnf(PyObject* self, PyObject* args) {
     // Parse the input arguments from Python
-    int n, k;
+    int n, k, i, j;
     double *matrixH, *matrixW;
     PyObject *py_result;
     if(!PyArg_ParseTuple(args, "OOii", &matrixW, &matrixH, &n, &k)) {
@@ -182,14 +186,14 @@ static PyObject* symnf(PyObject* self, PyObject* args) {
     matrixW = safe_malloc(n * n * sizeof(double));
 
     // insert python inputs to matricies:
-    for(int i = 0; i < n; i++) {
-        for(int j = 0; j < k; j++) {
+    for(i = 0; i < n; i++) {
+        for(j = 0; j < k; j++) {
             PyObject* value =  PyList_GetItem(matrixH, i * k + j);
             matrixH[i * k + j] = PyFloat_AsDouble(value);
         }
     }
-    for(int i = 0; i < n; i++) {
-        for(int j = 0; j < n; j++) {
+    for(i = 0; i < n; i++) {
+        for(j = 0; j < n; j++) {
             PyObject* value =  PyList_GetItem(matrixW, i * n + j);
             matrixW[i * n + j] = PyFloat_AsDouble(value);
         }
