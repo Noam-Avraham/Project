@@ -1,5 +1,6 @@
 #ifndef SYMNMF_H
 #define SYMNMF_H
+#include "structure.h"
 void compute_similarity(double *matrix, int rows, int cols, vector *head_vec);
 
 void compute_ddg(double *matrix, int rows, int cols, double *similarity_matrix);
@@ -10,7 +11,7 @@ void compute_symnmf(int n, int k, double *W, double *H);
 
 void* safe_malloc(size_t size);
 
-void free_vector(struct vector* vec);
+void free_vector( vector* vec);
 
 /**need to check */
 // void free_matrix(double** matrix, int rows);

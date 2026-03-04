@@ -7,7 +7,7 @@ setup(
     ext_modules=[
         Extension(
             'symnmf', 
-            sources=['symnmfmodule.c'] 
+            sources=['symnmfmodule.c', 'symnmf.c'], 
         )
     ]
 )

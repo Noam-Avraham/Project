@@ -1,6 +1,7 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include "symnmf.h"
+#include "structure.h"
 
 static PyObject* sym(PyObject* self, PyObject* args);
 

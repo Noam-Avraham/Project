@@ -1,17 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "structure.h"
 
-
-typedef struct cord{
-    double value;
-    struct cord *next;
-} cord;
-typedef struct vector{
-    struct vector *next;
-    struct cord *cords;
-   
-} vector;
 
 
 
@@ -27,9 +18,9 @@ void* safe_malloc(size_t size) {
 
 
     /* free vector and cords */
-void free_vector(struct vector* vec){
-        struct cord* current_cord;
-        struct cord* next_cord;
+void free_vector( vector* vec){
+        cord* current_cord;
+        cord* next_cord;
         current_cord = vec->cords;
         while (current_cord != NULL) {
             next_cord = current_cord->next;
