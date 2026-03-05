@@ -142,8 +142,8 @@ def kmeans(k: int,epsilon: float,max_iters: int,points):
 		if(diff<epsilon):
 			break
 	#we finish updating, printing the clusters
-	print_clusters(clusters)
-	return 0
+	#print_clusters(clusters)
+	return clusters
 
 
 if __name__ == '__main__':
