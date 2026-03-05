@@ -1,6 +1,6 @@
 import sys
 import numpy as np
-import symnmf
+import symnmf_module as symnmf
 
 
 def main():

@@ -194,7 +194,7 @@ static struct PyModuleDef symnmfmodule = {
     SymNMFMethods
 };
 
-PyMODINIT_FUNC PyInit_symnmf(void) {
+PyMODINIT_FUNC PyInit_symnmf_module(void) {
     return PyModule_Create(&symnmfmodule);
 }
 
