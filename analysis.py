@@ -30,6 +30,8 @@ def main():
     # הדפסה בפורמט הנדרש
     print(f"nmf: {nmf_score:.4f}")
     print(f"kmeans: {kmeans_score:.4f}")
+
+    
 def read_points(file_name):
     # pts is list of list of floats
     points = []
