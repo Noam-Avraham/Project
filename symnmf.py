@@ -26,7 +26,11 @@ def main():
     file_name = sys.argv[3]
     points = read_points(file_name)
     
-    main_function(points, k, goal)
+    final_matrix = main_function(points, k, goal)
+    #print matrix according to the format
+    print_matrix(final_matrix)   
+    sys.exit(0)
+
 # diffrent function that can be used by analysis.py to get the H matrix.
 def main_function(points, k, goal):
     if not points:
@@ -42,27 +46,27 @@ def main_function(points, k, goal):
     #if goal isnt symnmf,send information to C
     if(goal == "sym"):
         #senfing to C sym()
-        final_matrix=sym(points, d, n)
+        final_matrix=symnmf.sym(points, d, n)
    
     elif(goal == "ddg"):
         #senfing to C ddg()
-        final_matrix=ddg(points, d, n)
+        final_matrix=symnmf.ddg(points, d, n)
     
     elif(goal == "norm"):
         #sending to C norm()
-        final_matrix=norm(points, d, n)
+        final_matrix=symnmf.norm(points, d, n)
    
     elif(goal == "symnmf"):
-        W=norm(points, d, n)
+        W=symnmf.norm(points, d, n)
         
         start_H=initial_H(W,n,k)
         #sending to C symnmf()
-        final_matrix=symnmf(W,start_H,n,k)
+        final_matrix=symnmf.symnmf(W,start_H,n,k)
+
+    return final_matrix
     
     
-    #print matrix according to the format
-    print_matrix(final_matrix)   
-    sys.exit(0)
+
 
 # def similarity_matrix(points):
 #     X=np.array(points)
@@ -139,7 +143,6 @@ def read_points(file_name):
             coard_float=float(coard)
             current_point.append(coard_float)
         points.append(current_point)
-
     return points
 	
 
