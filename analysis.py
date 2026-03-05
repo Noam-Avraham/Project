@@ -30,6 +30,37 @@ def main():
     # הדפסה בפורמט הנדרש
     print(f"nmf: {nmf_score:.4f}")
     print(f"kmeans: {kmeans_score:.4f}")
+<<<<<<< HEAD
+=======
+
+    
+def read_points(file_name):
+    # pts is list of list of floats
+    points = []
+    try:
+        with open(file_name, 'r') as f:
+            lines = f.read().strip().splitlines()
+    except Exception:
+        print("An Error Has Occurred")
+        sys.exit(1)
+
+    for line in lines:
+        if not line.strip():
+            continue
+        coards_string=line.split(',')
+        current_point=[]
+        
+        for coard in coards_string:
+            try:
+                coard_float = float(coard)
+            except ValueError:
+                print("An Error Has Occurred")
+                sys.exit(1)
+            coard_float=float(coard)
+            current_point.append(coard_float)
+        points.append(current_point)
+    return points
+>>>>>>> 0617203dd9f0f09f1aa3d5e3ed9039bfa12c62fe
 
 if __name__ == "__main__":
     main()

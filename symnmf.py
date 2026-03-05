@@ -66,33 +66,6 @@ def main_function(points, k, goal):
     return final_matrix
     
     
-
-
-# def similarity_matrix(points):
-#     X=np.array(points)
-#     #in norms i,j (a_i)^2 +(a_j)^2
-#     norms = np.sum(X**2, axis=1).reshape(-1, 1)
-#     #a_i,j is the distance a_i and a_j,  ||a_i - a_j||^2 = ||a_i||^2 + ||a_j||^2 - 2 * a_i . a_j
-#     distances = norms + norms.T - 2 * np.dot(X, X.T)
-
-#     distances = np.maximum(distances, 0)
-
-#     A = np.exp(-distances / 2)
-#     np.fill_diagonal(A, 0)
-    
-#     return A
-
-# def diagonal_degree_matrix(A):
-#     D = np.diag(np.sum(A, axis=1))
-#     return D
-
-# def weight_matrix(D,A):
-#     D_inv_sqrt = np.power(D, -0.5)
-#     #handling inf values after division by zero
-#     D_inv_sqrt[np.isinf(D_inv_sqrt)] = 0
-#     W = D_inv_sqrt @ A @ D_inv_sqrt
-#     return W
-    
    
    
 def print_matrix(matrix):
@@ -112,10 +85,6 @@ def initial_H(W,n,k):
 
     return H.tolist()
 
-# def euclidean_distance(x, y):
-#     point1 = np.array(x)
-#     point2 = np.array(y)
-#     return np.sqrt(np.sum((point1 - point2) ** 2))
 
 #read all data points.
 def read_points(file_name):
