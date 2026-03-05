@@ -7,32 +7,32 @@ def main():
     np.random.seed(1234)
     #check for correct number of arguments and validity of arguments
     if len(sys.argv) != 4:
-		print("An Error Has Occurred")
-		sys.exit(1)
-	try:
-		k = int(sys.argv[1])
-	except ValueError:
-		print("Incorrect number of clusters!")
-		sys.exit(1)
+        print("An Error Has Occurred")
+        sys.exit(1)
+    try:
+        k = int(sys.argv[1])
+    except ValueError:
+        print("Incorrect number of clusters!")
+        sys.exit(1)
     if(k <= 1):
         print("Incorrect number of clusters!")
         sys.exit(1)
-	
+
     goal = (sys.argv[2])
     if goal != "symnmf" and goal != "sym" and goal != "ddg" and goal != "norm":
         print("Invalid goal!")
         sys.exit(1)
-	
+
     file_name = sys.argv[3]
     points = read_points(file_name)
     
     main_function(points, k, goal)
 # diffrent function that can be used by analysis.py to get the H matrix.
 def main_function(points, k, goal):
-	if not points:
-		print("An Error Has Occurred")
-		sys.exit(1)
-	
+    if not points:
+        print("An Error Has Occurred")
+        sys.exit(1)
+    
     n = len(points)
     d= len(points[0])
 
@@ -124,21 +124,21 @@ def read_points(file_name):
         print("An Error Has Occurred")
         sys.exit(1)
 
-	for line in lines:
-		if not line.strip():
-			continue
-		coards_string=line.split(',')
-		current_point=[]
-		
-		for coard in coards_string:
-			try:
-				coard_float = float(coard)
-			except ValueError:
-				print("An Error Has Occurred")
-				sys.exit(1)
-			coard_float=float(coard)
-			current_point.append(coard_float)
-		points.append(current_point)
+    for line in lines:
+        if not line.strip():
+            continue
+        coards_string=line.split(',')
+        current_point=[]
+        
+        for coard in coards_string:
+            try:
+                coard_float = float(coard)
+            except ValueError:
+                print("An Error Has Occurred")
+                sys.exit(1)
+            coard_float=float(coard)
+            current_point.append(coard_float)
+        points.append(current_point)
 
     return points
 	
