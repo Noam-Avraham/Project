@@ -35,59 +35,37 @@ void matrix_to_points(double *matrix, vector *head_vec, int rows, int cols) {
 }
 
 
-void parse_points(vector *head_vec, int* n, int* dim) {
+int parse_points(vector *head_vec, int* n, int* dim, PyObject* args) {
     /**parse the input from python */
     PyObject *points_obj;
-    int n,dim, i,j;
+    int i,j;
     double** points;
 
     if(!PyArg_ParseTuple(args, "Oii", &points_obj, &dim, &n)) {
-        return NULL;
+        return 1;
     }
 
     /**initalize points to python.points */
-    points = (double**)safe_malloc(n * sizeof(double*));
-    for(i = 0; i < n; i++) {
-        points[i] = (double*)safe_malloc(dim * sizeof(double));
+    points = (double**)safe_malloc((*n) * sizeof(double*));
+    for(i = 0; i < *n; i++) {
+        points[i] = (double*)safe_malloc((*dim) * sizeof(double));
         PyObject* point = PyList_GetItem(points_obj, i);
-        for(j = 0; j < dim; j++) {
+        for(j = 0; j < *dim; j++) {
             PyObject* coord =  PyList_GetItem(point, j);
             points[i][j] = PyFloat_AsDouble(coord);
         }
     }
 
     /*Turn points matrix to vector*/
-    matrix_to_points(&points[0][0], head_vec, n, dim);
-    
-        
+    matrix_to_points(&points[0][0], head_vec, *n, *dim);
+    /*Free the points matrix*/
+    for(i = 0; i < *n; i++) {
+        free(points[i]);
+    }
+    free(points);
+    return 0;
 }
 
-/* Get the matrix from the input file and store it in a linked list representation */
-/* Currently not used. */
-void parse_matrix(vector *head_vec, int* rows, int* cols) {
-    /**parse the input from python */
-    PyObject *matrix_obj;
-    int rows,cols, i,j;
-    double** matrix;
-
-    if(!PyArg_ParseTuple(args, "Oii", &matrix_obj, &rows, &cols)) {
-        return NULL;
-    }
-
-    /**initalize points to python.points */
-    matrix = (double**)safe_malloc(rows * sizeof(double*));
-    for(i = 0; i < rows; i++) {
-        matrix[i] = (double*)safe_malloc(cols * sizeof(double));
-        PyObject* row = PyList_GetItem(matrix_obj, i);
-        for(j = 0; j < cols; j++) {
-            PyObject* value =  PyList_GetItem(row, j);
-            matrix[i][j] = PyFloat_AsDouble(value);
-        }
-    }
-
-    /*Turn points matrix to vector*/
-    matrix_to_points(&matrix[0][0], head_vec, rows, cols);
-}
 
 PyObject* metrix_to_python(double *matrix, int rows, int cols) {
     PyObject* py_result = PyList_New(rows);
@@ -119,7 +97,9 @@ static PyObject* sym(PyObject* self, PyObject* args) {
     PyObject *py_result;
     vector *head_vec = (vector*)safe_malloc(sizeof(vector));
     head_vec->next = NULL;
-    parse_points(head_vec, &n, &dim);
+    if (parse_points(head_vec, &n, &dim, args) == 1) {
+        return NULL;
+    }
     /* Call the sym function and return the result to Python */
     matrixA = safe_malloc(n * n * sizeof(double));
     compute_similarity(&matrixA[0], n, dim, head_vec);
@@ -137,7 +117,9 @@ static PyObject* ddg(PyObject* self, PyObject* args) {
     PyObject *py_result;
     vector *head_vec = (vector*)safe_malloc(sizeof(vector));
     head_vec->next = NULL;
-    parse_points(head_vec, &n, &dim);
+    if (parse_points(head_vec, &n, &dim, args) == 1) {
+        return NULL;
+    }
     /* Call the ddg function and return the result to Python */
     matrixA = safe_malloc(n * n * sizeof(double));
     compute_similarity(&matrixA[0], n, dim, head_vec);
@@ -157,7 +139,9 @@ static PyObject* norm(PyObject* self, PyObject* args) {
     PyObject *py_result;
     vector *head_vec = (vector*)safe_malloc(sizeof(vector));
     head_vec->next = NULL;
-    parse_points(head_vec, &n, &dim);
+    if (parse_points(head_vec, &n, &dim, args) == 1) {
+        return NULL;
+    }
     /* Call the symnmf function and return the result to Python */
     matrixA = safe_malloc(n * n * sizeof(double));
     compute_similarity(&matrixA[0], n, dim, head_vec);
@@ -179,8 +163,8 @@ static PyObject* symnf(PyObject* self, PyObject* args) {
     /* Parse the input arguments from Python */
     int n, k, i, j;
     double *matrixH, *matrixW;
-    PyObject *py_result;
-    if(!PyArg_ParseTuple(args, "OOii", &matrixW, &matrixH, &n, &k)) {
+    PyObject *py_result, *matrixH_obj, *matrixW_obj;
+    if(!PyArg_ParseTuple(args, "OOii", &matrixW_obj, &matrixH_obj, &n, &k)) {
         return NULL;
     }
     matrixH = safe_malloc(n * k * sizeof(double));
@@ -189,13 +173,13 @@ static PyObject* symnf(PyObject* self, PyObject* args) {
     /* insert python inputs to matricies: */
     for(i = 0; i < n; i++) {
         for(j = 0; j < k; j++) {
-            PyObject* value =  PyList_GetItem(matrixH, i * k + j);
+            PyObject* value =  PyList_GetItem(matrixH_obj, i * k + j);
             matrixH[i * k + j] = PyFloat_AsDouble(value);
         }
     }
     for(i = 0; i < n; i++) {
         for(j = 0; j < n; j++) {
-            PyObject* value =  PyList_GetItem(matrixW, i * n + j);
+            PyObject* value =  PyList_GetItem(matrixW_obj, i * n + j);
             matrixW[i * n + j] = PyFloat_AsDouble(value);
         }
     }
@@ -225,7 +209,7 @@ static struct PyModuleDef symnmfmodule = {
     PyModuleDef_HEAD_INIT,
     "symnmf", /* name of module */
     NULL, /* module documentation, may be NULL */
-    -1, /* size of per-interpreter state of the module, or -1 if the module keeps state in global  */variables.
+    -1, /* size of per-interpreter state of the module, or -1 if the module keeps state in global  variables. */
     SymNMFMethods
 };
 
