@@ -116,4 +116,5 @@ def read_points(file_name):
 	
 
 if __name__ == "__main__":
+    np.random.seed(1234)
     main()
