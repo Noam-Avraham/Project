@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "structure.h"
+#include <string.h>
 
 
 
@@ -221,58 +222,70 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    head_cord = safe_malloc(sizeof( cord));
-    curr_cord = head_cord;
-    curr_cord->next = NULL;
+        /* Initialize first structures */
+    head_cord = safe_malloc(sizeof(cord));
+    head_cord->next = NULL;
 
-    head_vec = safe_malloc(sizeof( vector));
+    head_vec = safe_malloc(sizeof(vector));
+    head_vec->next = NULL;
+    head_vec->cords = NULL; /* Vital: prevents the 'Conditional Jump' error */
+
     curr_vec = head_vec;
-    curr_vec->next = NULL;
-    
-    while (fscanf(input_file, "%lf%c", &n, &c) != EOF)
-    {   
+    curr_cord = head_cord;
+
+    while (fscanf(input_file, "%lf%c", &n, &c) != EOF) {
+        curr_cord->value = n;
+
         if (c == '\n' || c == '\r') {
-            int next_char = fgetc(input_file);
-            curr_cord->value = n;
-            curr_vec->cords = head_cord;
+            int next_char;
+            if (c == '\r') fgetc(input_file); /* Handle Windows \r\n */
+            
+            curr_vec->cords = head_cord; /* Attach the row's coordinates */
             rows++;
-
-            /* Peek to see if we are at the end BEFORE allocating the next node */
-            if (next_char == EOF) {
-                break; 
+            
+            /* If this was the first row, we now know the final 'cols' count */
+            if (rows == 1) {
+                cols++; 
             }
-            ungetc(next_char, input_file); /* Put it back if it's not EOF */
 
+            next_char = fgetc(input_file);
+            if (next_char == EOF) break; 
+            ungetc(next_char, input_file);
+
+            /* Prep for the NEXT vector/row */
             curr_vec->next = safe_malloc(sizeof(vector));
             curr_vec = curr_vec->next;
             curr_vec->next = NULL;
+            curr_vec->cords = NULL; /* Crucial for cleanup logic */
 
             head_cord = safe_malloc(sizeof(cord));
             curr_cord = head_cord;
             curr_cord->next = NULL;
-            continue;
+        } else {
+            /* This is a comma or space within a row */
+            if (rows == 0) {
+                cols++; /* Only count columns during the very first row */
+            }
+            curr_cord->next = safe_malloc(sizeof(cord));
+            curr_cord = curr_cord->next;
+            curr_cord->next = NULL;
         }
-        cols++;
-        curr_cord->value = n;
-        curr_cord->next = safe_malloc(sizeof( cord));
-        curr_cord = curr_cord->next;
-        curr_cord->next = NULL;
     }
+
+    fclose(input_file);
 
     if(rows == 0){
         fprintf(stderr, "Error: No data points found in file %s\n", file_name);
         return 1;
     }
-    cols = cols / rows + 1;
-    fclose(input_file);
     matrixA = safe_malloc(rows * rows * sizeof(double));
     /* logic for the different goals*/
-    if (goal[0] == 's' && goal[1] == 'y' && goal[2] == 'm') {
+    if (strcmp(goal, "sym") == 0) {
         compute_similarity(&matrixA[0], rows, cols, head_vec);
         print_matrix(matrixA, rows, rows);
         free(matrixA);
     }
-    else if (goal[0] == 'd' && goal[1] == 'd' && goal[2] == 'g') {
+    else if (strcmp(goal, "ddg") == 0) {
         matrixD = safe_malloc(rows * rows * sizeof(double));
         compute_similarity(&matrixA[0], rows, cols, head_vec);
         compute_ddg(matrixD, rows, rows, matrixA);
@@ -280,7 +293,7 @@ int main(int argc, char *argv[])
         free(matrixA);
         free(matrixD);
     }
-    else if (goal[0] == 'n' && goal[1] == 'o' && goal[2] == 'r' && goal[3] == 'm') {
+    else if (strcmp(goal, "norm") == 0) {
         matrixD = safe_malloc(rows * rows * sizeof(double));
         matrixW = safe_malloc(rows * rows * sizeof(double));
         compute_similarity(matrixA, rows, cols, head_vec);
