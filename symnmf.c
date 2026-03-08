@@ -180,12 +180,21 @@ void print_vectors(vector *head_vec, int rows, int cols) {
     }
 }
 
+void free_points(vector *head_vec) {
+    vector *curr_vec = head_vec;
+    while (curr_vec != NULL)
+    {
+        vector *next_vec = curr_vec->next;
+        free_vector(curr_vec);
+        curr_vec = next_vec;
+    }
+}
+
 
 int main(int argc, char *argv[])
 {   /* input reading. */
 
     double *matrixA, *matrixD, *matrixW;
-     vector* next_vec;
     char* goal, *file_name;
     /* inputfile reader from std_in */
     /* creating points */
@@ -222,8 +231,9 @@ int main(int argc, char *argv[])
     
     while (fscanf(input_file, "%lf%c", &n, &c) != EOF)
     {   
-        if (c == '\n')
+        if (c == '\n' || c == '\r')
         {
+            if (c == '\r') fgetc(input_file); /* Skip the \n in \r\n */
             curr_cord->value = n;
             curr_vec->cords = head_cord;
             rows++;
@@ -232,6 +242,11 @@ int main(int argc, char *argv[])
             curr_vec = curr_vec->next;
             curr_vec->next = NULL;
             
+            /*Check end of file: */
+            if (feof(input_file)) {
+                break;
+            }
+
             head_cord = safe_malloc(sizeof( cord));
             curr_cord = head_cord;
             curr_cord->next = NULL;
@@ -243,6 +258,11 @@ int main(int argc, char *argv[])
         curr_cord = curr_cord->next;
         curr_cord->next = NULL;
     }
+
+    if(rows == 0){
+        fprintf(stderr, "Error: No data points found in file %s\n", file_name);
+        return 1;
+    }
     cols = cols / rows + 1;
     fclose(input_file);
     matrixA = safe_malloc(rows * rows * sizeof(double));
@@ -250,12 +270,14 @@ int main(int argc, char *argv[])
     if (goal[0] == 's' && goal[1] == 'y' && goal[2] == 'm') {
         compute_similarity(&matrixA[0], rows, cols, head_vec);
         print_matrix(matrixA, rows, rows);
+        free(matrixA);
     }
     else if (goal[0] == 'd' && goal[1] == 'd' && goal[2] == 'g') {
         matrixD = safe_malloc(rows * rows * sizeof(double));
         compute_similarity(&matrixA[0], rows, cols, head_vec);
         compute_ddg(matrixD, rows, rows, matrixA);
         print_matrix(matrixD, rows, rows);
+        free(matrixA);
         free(matrixD);
     }
     else if (goal[0] == 'n' && goal[1] == 'o' && goal[2] == 'r' && goal[3] == 'm') {
@@ -265,6 +287,7 @@ int main(int argc, char *argv[])
         compute_ddg(matrixD, rows, rows, matrixA);
         compute_norm(matrixW, rows, rows, matrixD, matrixA);
         print_matrix(matrixW, rows, rows);
+        free(matrixA);
         free(matrixD);
         free(matrixW);
     }
@@ -275,14 +298,7 @@ int main(int argc, char *argv[])
 
     
     /* free memory */
-    curr_vec = head_vec;
-    while (curr_vec -> next != NULL)
-    {
-        next_vec = curr_vec->next;
-        free_vector(curr_vec);
-        curr_vec = next_vec;
-    }
-    free(matrixA);
-
+    free_points(head_vec);
+    free(head_cord);
     return 0;
 }

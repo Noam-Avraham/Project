@@ -17,4 +17,6 @@ void print_matrix(double *matrix, int rows, int cols);
 
 void print_vectors(vector *head_vec, int rows, int cols);
 
+void free_points(vector *head_vec);
+
 #endif

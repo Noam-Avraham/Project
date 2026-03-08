@@ -63,15 +63,7 @@ PyObject* metrix_to_python(double *matrix, int rows, int cols) {
     return py_result;
 }
 
-void free_points(vector *head_vec) {
-    vector *curr_vec = head_vec;
-    while (curr_vec -> next != NULL)
-    {
-        vector *next_vec = curr_vec->next;
-        free_vector(curr_vec);
-        curr_vec = next_vec;
-    }
-}
+
 
 
 static PyObject* sym(PyObject* self, PyObject* args) {
