@@ -5,10 +5,12 @@ import symnmf
 import kmeans
 
 def main():
-    if len(sys.argv) < 3:
+    if len(sys.argv) != 3:
         return
-    
-    k = int(sys.argv[1])
+    try:
+        k = int(sys.argv[1])
+    except ValueError:
+        return 
     file_name = sys.argv[2]
     #using the read_points function from symnmf to read the data points
     points = symnmf.read_points(file_name)
