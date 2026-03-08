@@ -231,23 +231,23 @@ int main(int argc, char *argv[])
     
     while (fscanf(input_file, "%lf%c", &n, &c) != EOF)
     {   
-        if (c == '\n' || c == '\r')
-        {
-            if (c == '\r') fgetc(input_file); /* Skip the \n in \r\n */
+        if (c == '\n' || c == '\r') {
+            int next_char = fgetc(input_file);
             curr_cord->value = n;
             curr_vec->cords = head_cord;
             rows++;
-            
-            curr_vec->next = safe_malloc(sizeof( vector));
+
+            /* Peek to see if we are at the end BEFORE allocating the next node */
+            if (next_char == EOF) {
+                break; 
+            }
+            ungetc(next_char, input_file); /* Put it back if it's not EOF */
+
+            curr_vec->next = safe_malloc(sizeof(vector));
             curr_vec = curr_vec->next;
             curr_vec->next = NULL;
-            
-            /*Check end of file: */
-            if (feof(input_file)) {
-                break;
-            }
 
-            head_cord = safe_malloc(sizeof( cord));
+            head_cord = safe_malloc(sizeof(cord));
             curr_cord = head_cord;
             curr_cord->next = NULL;
             continue;
@@ -296,9 +296,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    
     /* free memory */
     free_points(head_vec);
-    free(head_cord);
     return 0;
 }
