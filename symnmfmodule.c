@@ -27,23 +27,33 @@ int parse_points(vector *head_vec, int* n, int* dim, PyObject* args) {
     /* Get vector straight from python*/
     curr_vec = head_vec;
     for(i = 0; i < *n; i++) {
-        vector *new_vec;
-        cord *curr_cord = (cord*)safe_malloc(sizeof(cord));
-        curr_cord->next = NULL;
-        curr_vec->cords = curr_cord;
+        curr_vec->cords = NULL; 
+        curr_vec->next = NULL;  
+
+        cord *head_cord = (cord*)safe_malloc(sizeof(cord));
+        head_cord->next = NULL;
+        curr_vec->cords = head_cord;
+        
+        cord *temp_cord = head_cord;
         PyObject* point = PyList_GetItem(points_obj, i);
+
         for(j = 0; j < *dim; j++) {
-            cord *new_cord = (cord*)safe_malloc(sizeof(cord));
-            PyObject* coord =  PyList_GetItem(point, j);
-            curr_cord->value = PyFloat_AsDouble(coord);
-            new_cord->next = NULL;
-            curr_cord->next = new_cord;
-            curr_cord = new_cord;
+            PyObject* coord = PyList_GetItem(point, j);
+            temp_cord->value = PyFloat_AsDouble(coord);
+            
+            if (j < *dim - 1) { /* Only allocate NEXT if there is another coordinate */
+                temp_cord->next = (cord*)safe_malloc(sizeof(cord));
+                temp_cord = temp_cord->next;
+                temp_cord->next = NULL;
+            }
         }
-        new_vec = (vector*)safe_malloc(sizeof(vector));
-        new_vec->next = NULL;
-        curr_vec->next = new_vec;
-        curr_vec = new_vec;
+
+        if (i < *n - 1) { /* Only allocate NEXT if there is another vector */
+            curr_vec->next = (vector*)safe_malloc(sizeof(vector));
+            curr_vec = curr_vec->next;
+            curr_vec->next = NULL;
+            curr_vec->cords = NULL;
+        }
     }
 
     return 0;
