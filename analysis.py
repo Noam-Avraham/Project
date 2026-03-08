@@ -27,9 +27,10 @@ def main():
     
     kmeans_score = silhouette_score(points, kmeans_labels)
     
-    # הדפסה בפורמט הנדרש
+    #print the scores
     print(f"nmf: {nmf_score:.4f}")
     print(f"kmeans: {kmeans_score:.4f}")
 
 if __name__ == "__main__":
+    np.random.seed(1234)
     main()
