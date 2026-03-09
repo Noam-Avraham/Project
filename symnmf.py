@@ -12,21 +12,21 @@ def main():
     try:
         k = int(sys.argv[1])
     except ValueError:
-        print("Incorrect number of clusters!")
+        print("An Error Has Occurred")
         sys.exit(1)
     if(k <= 1):
-        print("Incorrect number of clusters!")
+        print("An Error Has Occurred")
         sys.exit(1)
 
     goal = (sys.argv[2])
     if goal != "symnmf" and goal != "sym" and goal != "ddg" and goal != "norm":
-        print("Invalid goal!")
+        print("An Error Has Occurred")
         sys.exit(1)
-
+    #assuming file name valid
     file_name = sys.argv[3]
-    points = read_points(file_name)
-    
+    points = read_points(file_name)   
     final_matrix = main_function(points, k, goal)
+   
     #print matrix according to the format
     print_matrix(final_matrix)   
     sys.exit(0)

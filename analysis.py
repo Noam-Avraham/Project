@@ -10,7 +10,8 @@ def main():
     try:
         k = int(sys.argv[1])
     except ValueError:
-        return 
+        print("An Error Has Occurred")
+        sys.exit(1)
     file_name = sys.argv[2]
    
     #using the read_points function from symnmf to read the data points
@@ -26,15 +27,16 @@ def main():
     print(f"nmf: {nmf_score:.4f}")
     print(f"kmeans: {kmeans_score:.4f}")
 
-
+#calculate silhouette score from kmeans results (HW1)
 def kmeans_score_func(points, k):
     if(k<1 or k>=len(points)):
-        print("An error has occurred!")
+        print("An Error Has Occurred")
         sys.exit(1)
+    
     centroids = kmeans.kmeans(k,0.0001,400, points)
     centroids = np.array(centroids)
     kmeans_labels = []
-    #assifn cluster to each point according to kmeans centroids results
+    #assign cluster to each point according to kmeans centroids results
     for point in points:
         distances = np.linalg.norm(centroids - point, axis=1)
         kmeans_labels.append(np.argmin(distances))
