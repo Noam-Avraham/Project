@@ -38,12 +38,12 @@ def main_function(points, k, goal):
         sys.exit(1)
     
     n = len(points)
-    d= len(points[0])
+    d = len(points[0])
 
     if k <= 1 or k >= n:
-        print("Incorrect number of clusters!")
+        print("An Error Has Occurred")
         sys.exit(1)
-    #if goal isnt symnmf,send information to C
+    #if goal is not symnmf,send information to C
     if(goal == "sym"):
         #senfing to C sym()
         final_matrix=symnmf.sym(points, d, n)
@@ -65,24 +65,21 @@ def main_function(points, k, goal):
 
     return final_matrix
     
-    
-   
-   
+#function to print the matrix acccording to the format.
 def print_matrix(matrix):
     for row in matrix:
         st=[]
         for x in range(len(row)):
             st.append('{0:.4f}'.format(row[x]))
         print(','.join(st))
-
+#calculate the initial H matrix.
 def initial_H(W,n,k):
     W_np = np.array(W)
     m = np.mean(W_np)
-    
     upper_bound = 2 * np.sqrt(m / k)
     
     H = np.random.uniform(0, upper_bound, size=(n, k))
-
+    
     return H.tolist()
 
 
