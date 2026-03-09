@@ -118,47 +118,63 @@ void compute_norm(double *matrix, int rows, int cols, double *degree_matrix, dou
 
 void compute_symnmf(int n, int k, double *W, double *H) {
     /* Implement the logic for symmetric non-negative matrix factorization*/
-    int iter, i, j, it, l, m;
-    double epsilon, sum_diff, temp_diff, old_val, numerator, denominator, tempW;
-    
+    int iter, i, j, it, l;
+    double epsilon, sum_diff, tempH;
+    double *HHT = (double*)safe_malloc(n * n * sizeof(double));
+    double *HHTH = (double*)safe_malloc(n * k * sizeof(double));
+    double *WH = (double*)safe_malloc(n * k * sizeof(double));
+
     iter = 300; /* defualt value */
-    epsilon= 0.001;
+    epsilon= 0.0001;
+    sum_diff = 0.0;
 
     for(it = 0; it < iter; it++) {
-        sum_diff = 0.0;
+        /*Compute HH^T*/
         for(i = 0; i < n; i++) {
-            for(j = 0; j < k; j++) {
-                old_val = H[i * k + j];
-                numerator = 0.0;
-                denominator = 0.0;
-                for(l = 0; l < n; l++) {
-                    /* Calculate numerator = W * H:*/
-                    numerator += W[i * n + l] * H[l * k + j];
-                    
-                    /* Calculate denominator = H * H^T * H:*/
-                    tempW = 0.0;
-                    for(m = 0; m < k; m++) {
-                        tempW += H[i * k + m] * H[l * k + m];
-                    }
-
-                    denominator += tempW * H[l * k + j];
+            for(j = 0; j < n; j++) {
+                HHT[i * n + j] = 0.0;
+                for(l = 0; l < k; l++) {
+                    HHT[i * n + j] += H[i * k + l] * H[j * k + l];
                 }
-                
-                if(denominator > 0) {
-                    H[i * k + j] = old_val * (1 - 0.5 + 0.5 * (numerator / denominator));
-                } else {
-                    /* Not expected to happen, but in case of zero denominator, we can keep the old value or set it to a small positive number*/
-                    H[i * k + j] = old_val;
-                }
-                temp_diff = H[i * k + j] - old_val;
-                sum_diff += temp_diff * temp_diff;
-                
             }
         }
-        if(sum_diff < epsilon) {
-            break;
+        /*Compute HH^TH*/
+        for(i = 0; i < n; i++) {
+            for(j = 0; j < k; j++) {
+                HHTH[i * k + j] = 0.0;
+                for(l = 0; l < n; l++) {
+                    HHTH[i * k + j] += HHT[i * n + l] * H[l * k + j];
+                }
+            }
         }
+
+        /*Compute WH*/
+        for(i = 0; i < n; i++) {
+            for(j = 0; j < k; j++) {
+                WH[i * k + j] = 0.0;
+                for(l = 0; l < n; l++) {
+                    WH[i * k + j] += W[i * n + l] * H[l * k + j];
+                }
+            }
+        }
+
+        /*Update H*/
+        for(i = 0; i < n; i++) {
+            for(j = 0; j < k; j++) {
+                tempH = H[i * k + j] * (0.5 + 0.5 * WH[i * k + j] / (HHTH[i * k + j]));
+                sum_diff += (tempH - H[i * k + j]) * (tempH - H[i * k + j]);
+                H[i * k + j] = tempH;
+            }
+        }
+       if (sum_diff < epsilon) {
+            break; /* Convergence achieved*/
+        }
+        sum_diff = 0.0; /* Reset for next iteration*/
     }
+
+    free(HHT);
+    free(HHTH);
+    free(WH);
 
 }
 
