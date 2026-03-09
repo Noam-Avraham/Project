@@ -114,62 +114,83 @@ void compute_norm(double *matrix, int rows, int cols, double *degree_matrix, dou
     }
 }
 
+void compute_HHT(double *HHT, int n, int k, double *H) {
+    int i, j, l;
+    for(i = 0; i < n; i++) {
+        for(j = 0; j < n; j++) {
+            HHT[i * n + j] = 0.0;
+            for(l = 0; l < k; l++) {
+                HHT[i * n + j] += H[i * k + l] * H[j * k + l];
+            }
+        }
+    }
+}
 
+void compute_HHTH(double *HHTH, int n, int k, double *HHT, double *H) {
+    int i, j, l;
+    for(i = 0; i < n; i++) {
+        for(j = 0; j < k; j++) {
+            HHTH[i * k + j] = 0.0;
+            for(l = 0; l < n; l++) {
+                HHTH[i * k + j] += HHT[i * n + l] * H[l * k + j];
+            }
+        }
+    }
+}
+
+void compute_WH(double *WH, int n, int k, double *W, double *H) {
+    int i, j, l;
+    for(i = 0; i < n; i++) {
+        for(j = 0; j < k; j++) {
+            WH[i * k + j] = 0.0;
+            for(l = 0; l < n; l++) {
+                WH[i * k + j] += W[i * n + l] * H[l * k + j];
+            }
+        }
+    }
+}
+
+double update_H(double *H, double *WH, double *HHTH, int n, int k) {
+    int i, j;
+    double sum_diff = 0.0, tempH;
+    for(i = 0; i < n; i++) {
+        for(j = 0; j < k; j++) {
+            if (HHTH[i * k + j] != 0) {
+                tempH = H[i * k + j] * (0.5 + 0.5 * WH[i * k + j] / HHTH[i * k + j]);
+            } else {
+                tempH = H[i * k + j] * (0.5 + 0.5 * WH[i * k + j] / 0.000001);
+            }
+            sum_diff += (tempH - H[i * k + j]) * (tempH - H[i * k + j]);
+            H[i * k + j] = tempH;
+        }
+    }
+    return sum_diff;
+}
 
 void compute_symnmf(int n, int k, double *W, double *H) {
     /* Implement the logic for symmetric non-negative matrix factorization*/
-    int iter, i, j, it, l;
-    double epsilon, sum_diff, tempH;
+    int iter, it;
+    double epsilon, sum_diff;
     double *HHT = (double*)safe_malloc(n * n * sizeof(double));
     double *HHTH = (double*)safe_malloc(n * k * sizeof(double));
     double *WH = (double*)safe_malloc(n * k * sizeof(double));
-
     iter = 300; /* defualt value */
     epsilon= 0.0001;
     sum_diff = 0.0;
 
     for(it = 0; it < iter; it++) {
-        /*Compute HH^T*/
-        for(i = 0; i < n; i++) {
-            for(j = 0; j < n; j++) {
-                HHT[i * n + j] = 0.0;
-                for(l = 0; l < k; l++) {
-                    HHT[i * n + j] += H[i * k + l] * H[j * k + l];
-                }
-            }
-        }
-        /*Compute HH^TH*/
-        for(i = 0; i < n; i++) {
-            for(j = 0; j < k; j++) {
-                HHTH[i * k + j] = 0.0;
-                for(l = 0; l < n; l++) {
-                    HHTH[i * k + j] += HHT[i * n + l] * H[l * k + j];
-                }
-            }
-        }
+        compute_HHT(HHT, n, k, H);
 
-        /*Compute WH*/
-        for(i = 0; i < n; i++) {
-            for(j = 0; j < k; j++) {
-                WH[i * k + j] = 0.0;
-                for(l = 0; l < n; l++) {
-                    WH[i * k + j] += W[i * n + l] * H[l * k + j];
-                }
-            }
-        }
+        compute_HHTH(HHTH, n, k, HHT, H);
+
+        compute_WH(WH, n, k, W, H);
 
         /*Update H*/
-        for(i = 0; i < n; i++) {
-            for(j = 0; j < k; j++) {
-                tempH = H[i * k + j] * (0.5 + 0.5 * WH[i * k + j] / (HHTH[i * k + j]));
-                sum_diff += (tempH - H[i * k + j]) * (tempH - H[i * k + j]);
-                H[i * k + j] = tempH;
-            }
-        }
+        sum_diff = update_H(H, WH, HHTH, n, k);
+
        if (sum_diff < epsilon) {
             break; /* Convergence achieved*/
         }
-        sum_diff = 0.0; /* Reset for next iteration*/
     }
 
     free(HHT);
@@ -208,62 +229,23 @@ void free_points(vector *head_vec) {
 }
 
 
-int main(int argc, char *argv[])
-{   /* input reading. */
-
-    double *matrixA, *matrixD, *matrixW;
-    char* goal, *file_name;
-    /* inputfile reader from std_in */
-    /* creating points */
-     vector *head_vec, *curr_vec;
-     cord *head_cord, *curr_cord;
-    int rows, cols;
+void get_input(vector* head_vec, cord* head_cord, FILE* input_file, int* r_vec, int* c_vec){
+    cord *curr_cord;
+    vector *curr_vec;
     double n;
     char c;
-    FILE *input_file;
-
-    rows = 0, cols = 0;
-
-    if (argc != 3)
-    {
-        fprintf(stderr, "Usage: %s wrong input\n", argv[0]);
-        return 1;
-    }
-    goal = argv[1];
-    file_name = argv[2];
-    input_file = fopen(file_name, "r");
-    if (input_file == NULL)
-    {
-        fprintf(stderr, "Error: Could not open file %s\n", file_name);
-        return 1;
-    }
-
-        /* Initialize first structures */
-    head_cord = safe_malloc(sizeof(cord));
-    head_cord->next = NULL;
-
-    head_vec = safe_malloc(sizeof(vector));
-    head_vec->next = NULL;
-    head_vec->cords = NULL; /* Vital: prevents the 'Conditional Jump' error */
-
+    int rows = 0, cols = 0;
     curr_vec = head_vec;
     curr_cord = head_cord;
-
     while (fscanf(input_file, "%lf%c", &n, &c) != EOF) {
         curr_cord->value = n;
-
         if (c == '\n' || c == '\r') {
             int next_char;
             if (c == '\r') fgetc(input_file); /* Handle Windows \r\n */
-            
             curr_vec->cords = head_cord; /* Attach the row's coordinates */
             rows++;
-            
             /* If this was the first row, we now know the final 'cols' count */
-            if (rows == 1) {
-                cols++; 
-            }
-
+            if (rows == 1) cols++; 
             next_char = fgetc(input_file);
             if (next_char == EOF) break; 
             ungetc(next_char, input_file);
@@ -273,27 +255,23 @@ int main(int argc, char *argv[])
             curr_vec = curr_vec->next;
             curr_vec->next = NULL;
             curr_vec->cords = NULL; /* Crucial for cleanup logic */
-
             head_cord = safe_malloc(sizeof(cord));
             curr_cord = head_cord;
             curr_cord->next = NULL;
         } else {
             /* This is a comma or space within a row */
-            if (rows == 0) {
-                cols++; /* Only count columns during the very first row */
-            }
+            if (rows == 0) cols++; /* Only count columns during the very first row */
             curr_cord->next = safe_malloc(sizeof(cord));
             curr_cord = curr_cord->next;
             curr_cord->next = NULL;
         }
     }
+    *r_vec = rows;
+    *c_vec = cols;
+}
 
-    fclose(input_file);
-
-    if(rows == 0){
-        fprintf(stderr, "Error: No data points found in file %s\n", file_name);
-        return 1;
-    }
+int goals_logic(char* goal, int rows, int cols, vector *head_vec){
+    double *matrixA, *matrixD, *matrixW;
     matrixA = safe_malloc(rows * rows * sizeof(double));
     /* logic for the different goals*/
     if (strcmp(goal, "sym") == 0) {
@@ -321,10 +299,49 @@ int main(int argc, char *argv[])
         free(matrixW);
     }
     else{
-        fprintf(stderr, "Error: Invalid goal %s\n", goal);
+        printf("An Error Has Occurred");
+        return 1;
+    }
+    return 0;
+}
+
+
+int main(int argc, char *argv[]) {  
+    char* goal, *file_name;
+    vector *head_vec = NULL;
+    cord *head_cord = NULL;
+    int rows, cols;
+    FILE *input_file;
+
+    if (argc != 3){
+        printf("An Error Has Occurred");
+        return 1;
+    }
+    goal = argv[1];
+    file_name = argv[2];
+    input_file = fopen(file_name, "r");
+    if (input_file == NULL)
+    {
+        printf("An Error Has Occurred");
         return 1;
     }
 
+    /* Initialize first structures */
+    head_cord = safe_malloc(sizeof(cord));
+    head_cord->next = NULL;
+    head_vec = safe_malloc(sizeof(vector));
+    head_vec->next = NULL;
+    head_vec->cords = NULL;
+    get_input(head_vec, head_cord, input_file, &rows, &cols);
+    fclose(input_file);
+
+    if(rows == 0){
+        printf("An Error Has Occurred");
+        return 1;
+    }
+    if (goals_logic(goal, rows, cols, head_vec) != 0) {
+        return 1;
+    }
     /* free memory */
     free_points(head_vec);
     return 0;
