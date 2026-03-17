@@ -29,7 +29,7 @@ def main():
 
 #calculate silhouette score from kmeans results (HW1)
 def kmeans_score_func(points, k):
-    if(k<1 or k>=len(points)):
+    if(k<=1 or k>=len(points)):
         print("An Error Has Occurred")
         sys.exit(1)
     
