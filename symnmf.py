@@ -44,6 +44,7 @@ def main_function(points, k, goal):
         print("An Error Has Occurred")
         sys.exit(1)
     #if goal is not symnmf,send information to C
+    #if its not legal, print error and exit.(double check because it used as public function for analysis.py)
     if(goal == "sym"):
         #senfing to C sym()
         final_matrix=symnmf.sym(points, d, n)
@@ -62,6 +63,9 @@ def main_function(points, k, goal):
         start_H=initial_H(W,n,k)
         #sending to C symnmf()
         final_matrix=symnmf.symnmf(W,start_H,n,k)
+    else:
+        print("An Error Has Occurred")
+        sys.exit(1)
 
     return final_matrix
     
