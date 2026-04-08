@@ -84,6 +84,7 @@ static PyObject* sym(PyObject* self, PyObject* args) {
     vector *head_vec = (vector*)safe_malloc(sizeof(vector));
     head_vec->next = NULL;
     if (parse_points(head_vec, &n, &dim, args) == 1) {
+        free_points(head_vec);
         return NULL;
     }
     /* Call the sym function and return the result to Python */
@@ -103,6 +104,7 @@ static PyObject* ddg(PyObject* self, PyObject* args) {
     vector *head_vec = (vector*)safe_malloc(sizeof(vector));
     head_vec->next = NULL;
     if (parse_points(head_vec, &n, &dim, args) == 1) {
+        free_points(head_vec);
         return NULL;
     }
     /* Call the ddg function and return the result to Python */
@@ -125,6 +127,7 @@ static PyObject* norm(PyObject* self, PyObject* args) {
     vector *head_vec = (vector*)safe_malloc(sizeof(vector));
     head_vec->next = NULL;
     if (parse_points(head_vec, &n, &dim, args) == 1) {
+        free_points(head_vec);
         return NULL;
     }
     /* Call the symnmf function and return the result to Python */
