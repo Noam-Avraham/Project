@@ -299,6 +299,7 @@ int goals_logic(char* goal, int rows, int cols, vector *head_vec){
         free(matrixW);
     }
     else{
+        free(matrixA);
         printf("An Error Has Occurred");
         return 1;
     }
