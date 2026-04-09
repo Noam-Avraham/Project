@@ -73,7 +73,7 @@ void compute_similarity(double *matrix, int rows, int cols, vector *head_vec){
     current_vecI = head_vec;
     /* Similarity based on Euclidean distance*/
     for(i=0; i<rows; i++){
-        current_vecJ = head_vec;
+        current_vecJ = current_vecI;
         for(j=i; j< rows; j++){
             if (i == j) {
                 matrix[i*rows + j] = 0.0; /* Similarity with itself is 0*/
@@ -115,25 +115,25 @@ void compute_norm(double *matrix, int rows, int cols, double *degree_matrix, dou
     }
 }
 
-void compute_HHT(double *HHT, int n, int k, double *H) {
+void compute_HTH(double *HTH, int n, int k, double *H) {
     int i, j, l;
-    for(i = 0; i < n; i++) {
-        for(j = 0; j < n; j++) {
-            HHT[i * n + j] = 0.0;
-            for(l = 0; l < k; l++) {
-                HHT[i * n + j] += H[i * k + l] * H[j * k + l];
+    for(i = 0; i < k; i++) {
+        for(j = 0; j < k; j++) {
+            HTH[i * k + j] = 0.0;
+            for(l = 0; l < n; l++) {
+                HTH[i * k + j] += H[l * k + i] * H[l * k + j];
             }
         }
     }
 }
 
-void compute_HHTH(double *HHTH, int n, int k, double *HHT, double *H) {
+void compute_HHTH(double *HHTH, int n, int k, double *HTH, double *H) {
     int i, j, l;
     for(i = 0; i < n; i++) {
         for(j = 0; j < k; j++) {
             HHTH[i * k + j] = 0.0;
-            for(l = 0; l < n; l++) {
-                HHTH[i * k + j] += HHT[i * n + l] * H[l * k + j];
+            for(l = 0; l < k; l++) {
+                HHTH[i * k + j] += H[i * k + l] * HTH[l * k + j];
             }
         }
     }
@@ -170,9 +170,10 @@ double update_H(double *H, double *WH, double *HHTH, int n, int k) {
 
 void compute_symnmf(int n, int k, double *W, double *H) {
     /* Implement the logic for symmetric non-negative matrix factorization*/
+    /* Optimised for O(n*k^2)*/
     int iter, it;
     double epsilon, sum_diff;
-    double *HHT = (double*)safe_malloc(n * n * sizeof(double));
+    double *HTH = (double*)safe_malloc(k * k * sizeof(double));
     double *HHTH = (double*)safe_malloc(n * k * sizeof(double));
     double *WH = (double*)safe_malloc(n * k * sizeof(double));
     iter = 300; /* defualt value */
@@ -180,9 +181,9 @@ void compute_symnmf(int n, int k, double *W, double *H) {
     sum_diff = 0.0;
 
     for(it = 0; it < iter; it++) {
-        compute_HHT(HHT, n, k, H);
+        compute_HTH(HTH, n, k, H);
 
-        compute_HHTH(HHTH, n, k, HHT, H);
+        compute_HHTH(HHTH, n, k, HTH, H);
 
         compute_WH(WH, n, k, W, H);
 
@@ -194,7 +195,7 @@ void compute_symnmf(int n, int k, double *W, double *H) {
         }
     }
 
-    free(HHT);
+    free(HTH);
     free(HHTH);
     free(WH);
 
