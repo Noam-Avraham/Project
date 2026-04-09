@@ -104,15 +104,20 @@ void compute_ddg(double *matrix, int rows, int cols, double *similarity_matrix){
 void compute_norm(double *matrix, int rows, int cols, double *degree_matrix, double *similarity_matrix){
     /* Calculate and output the normalized similarity matrix*/
     int i, j;
+    double* pre_sqrt = safe_malloc(rows * sizeof(double));
+    for(i=0; i<rows; i++){
+        pre_sqrt[i] = sqrt(degree_matrix[i*cols + i]);
+    }
     for(i=0; i<rows; i++){
         for(j=0; j<cols; j++){
             if (degree_matrix[i*cols + i] > 0 && degree_matrix[j*cols + j] > 0) {
-                matrix[i*cols + j] = similarity_matrix[i*cols + j] / (sqrt(degree_matrix[i*cols + i] * degree_matrix[j*cols + j]));
+                matrix[i*cols + j] = similarity_matrix[i*cols + j] / (pre_sqrt[i] * pre_sqrt[j]);
             } else {
                 matrix[i*cols + j] = 0.0; /* Avoid division by zero*/
             }
         }
     }
+    free(pre_sqrt);
 }
 
 void compute_HTH(double *HTH, int n, int k, double *H) {
@@ -339,10 +344,13 @@ int main(int argc, char *argv[]) {
     fclose(input_file);
 
     if(rows == 0){
+        free_points(head_vec);
         printf("An Error Has Occurred");
         return 1;
     }
     if (goals_logic(goal, rows, cols, head_vec) != 0) {
+        free_points(head_vec);
+        printf("An Error Has Occurred");
         return 1;
     }
     /* free memory */
