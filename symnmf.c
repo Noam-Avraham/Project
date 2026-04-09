@@ -71,14 +71,15 @@ void compute_similarity(double *matrix, int rows, int cols, vector *head_vec){
     vector* current_vecI, *current_vecJ;
     int i, j;   
     current_vecI = head_vec;
+    /* Similarity based on Euclidean distance*/
     for(i=0; i<rows; i++){
         current_vecJ = head_vec;
-        for(j=0; j< rows; j++){
+        for(j=i; j< rows; j++){
             if (i == j) {
                 matrix[i*rows + j] = 0.0; /* Similarity with itself is 0*/
             } else {
-                matrix[i*rows + j] = exp(-1 * Euclidean_distance(current_vecI, current_vecJ, cols) / 2.0); 
-                /* Similarity based on Euclidean distance*/
+                matrix[i*rows + j] = exp(-1 * Euclidean_distance(current_vecI, current_vecJ, cols) / 2.0);
+                matrix[j*rows + i] = matrix[i*rows + j]; /* Symmetric matrix: copy the value to the other half */
             }
             current_vecJ = current_vecJ->next;
         }
