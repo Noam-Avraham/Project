@@ -13,11 +13,10 @@ static PyObject* symnmf(PyObject* self, PyObject* args);
 
 
 int parse_points(vector *head_vec, int* n, int* dim, PyObject* args) {
-    /**parse the input from python */
+    /* parse the input from python, input: points_obj, n = number of rows, dim = number of columns, output: head_vec */
     PyObject *points_obj;
     int i,j, temp_n, temp_dim;
     vector *curr_vec;
-
     if(!PyArg_ParseTuple(args, "Oii", &points_obj, &temp_dim, &temp_n)) {
         return 1;
     }
@@ -33,10 +32,8 @@ int parse_points(vector *head_vec, int* n, int* dim, PyObject* args) {
         cord *head_cord = (cord*)safe_malloc(sizeof(cord));
         head_cord->next = NULL;
         curr_vec->cords = head_cord;
-        
         cord *temp_cord = head_cord;
         PyObject* point = PyList_GetItem(points_obj, i);
-
         for(j = 0; j < *dim; j++) {
             PyObject* coord = PyList_GetItem(point, j);
             temp_cord->value = PyFloat_AsDouble(coord);
@@ -47,7 +44,6 @@ int parse_points(vector *head_vec, int* n, int* dim, PyObject* args) {
                 temp_cord->next = NULL;
             }
         }
-
         if (i < *n - 1) { /* Only allocate NEXT if there is another vector */
             curr_vec->next = (vector*)safe_malloc(sizeof(vector));
             curr_vec = curr_vec->next;
@@ -55,12 +51,12 @@ int parse_points(vector *head_vec, int* n, int* dim, PyObject* args) {
             curr_vec->cords = NULL;
         }
     }
-
     return 0;
 }
 
 
 PyObject* metrix_to_python(double *matrix, int rows, int cols) {
+    /* Convert a C matrix to a Python list of lists, input: matrix, rows = number of rows, cols = number of columns, output: py_result */
     PyObject* py_result = PyList_New(rows);
     int i, j;
     for (i = 0; i < rows; i++) {
@@ -77,7 +73,7 @@ PyObject* metrix_to_python(double *matrix, int rows, int cols) {
 
 
 static PyObject* sym(PyObject* self, PyObject* args) {
-    /* Parse the input arguments from Python */
+    /* Parse the input arguments from Python, input: head_vec, n = number of rows, dim = number of columns, output: py_result */
     int n, dim;
     double* matrixA;
     PyObject *py_result;
@@ -97,7 +93,7 @@ static PyObject* sym(PyObject* self, PyObject* args) {
 }
 
 static PyObject* ddg(PyObject* self, PyObject* args) {
-    /* Parse the input arguments from Python */
+    /* Parse the input arguments from Python, input: head_vec, n = number of rows, dim = number of columns, output: py_result */
     int n, dim;
     double* matrixD, *matrixA;
     PyObject *py_result;
@@ -120,7 +116,7 @@ static PyObject* ddg(PyObject* self, PyObject* args) {
 }
 
 static PyObject* norm(PyObject* self, PyObject* args) {
-    /* Parse the input arguments from Python */
+    /* Parse the input arguments from Python, input: head_vec, n = number of rows, dim = number of columns, output: py_result */
     int n, dim;
     double* matrixD, *matrixA, *matrixW;
     PyObject *py_result;
@@ -148,7 +144,8 @@ static PyObject* norm(PyObject* self, PyObject* args) {
 
 
 static PyObject* symnmf(PyObject* self, PyObject* args) {
-    /* Parse the input arguments from Python */
+    /* Perform symmetric non-negative matrix factorization*/
+    /* Parse the input arguments from Python, input: matrixW_obj, matrixH_obj, n = number of rows, k = number of columns, output: py_result */
     int n, k, i, j;
     double *matrixH, *matrixW;
     PyObject *py_result, *matrixH_obj, *matrixW_obj;

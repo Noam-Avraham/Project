@@ -8,6 +8,7 @@
 
 
 void* safe_malloc(size_t size) {
+    /* Safely allocate memory, input: size = number of bytes to allocate */
     void* ptr;
     ptr = malloc(size);
     while (ptr == NULL)
@@ -20,6 +21,7 @@ void* safe_malloc(size_t size) {
 
     /* free vector and cords */
 void free_vector( vector* vec){
+    /* Free the memory allocated for a vector and its coordinates, input: vec */
         cord* current_cord;
         cord* next_cord;
         current_cord = vec->cords;
@@ -34,6 +36,7 @@ void free_vector( vector* vec){
 
 
 void print_matrix(double *matrix, int rows, int cols) {
+    /* Print a matrix with the specified number of rows and columns, input: matrix, rows = number of rows, cols = number of columns */
     int i, j;
     for (i = 0; i < rows; i++) {
         for (j = 0; j < cols; j++) {
@@ -50,6 +53,7 @@ void print_matrix(double *matrix, int rows, int cols) {
 
 /* Calculate norma 2:*/
 double Euclidean_distance(vector* vec1, vector* vec2, int cols) {
+    /* Calculate the Euclidean distance between two vectors, input: vec1, vec2, cols = number of columns */
     cord* cord1;
     cord* cord2;
     double sum, diff;
@@ -67,7 +71,7 @@ double Euclidean_distance(vector* vec1, vector* vec2, int cols) {
 }
 
 void compute_similarity(double *matrix, int rows, int cols, vector *head_vec){
-    /*  Calculate and output the similarity matrix*/
+    /*  Calculate and output the similarity matrix, input: head_vec, rows = number of rows, cols = number of columns, output: matrix */
     vector* current_vecI, *current_vecJ;
     int i, j;   
     current_vecI = head_vec;
@@ -88,7 +92,7 @@ void compute_similarity(double *matrix, int rows, int cols, vector *head_vec){
 }
 
 void compute_ddg(double *matrix, int rows, int cols, double *similarity_matrix){
-    /* Calculate and output the degree matrix*/
+    /* Calculate and output the degree matrix, input: similarity_matrix, rows = number of rows, cols = number of columns, output: matrix */
     int i, j;
     double sum;
     for(i=0; i<rows; i++){
@@ -102,7 +106,9 @@ void compute_ddg(double *matrix, int rows, int cols, double *similarity_matrix){
 }
 
 void compute_norm(double *matrix, int rows, int cols, double *degree_matrix, double *similarity_matrix){
-    /* Calculate and output the normalized similarity matrix*/
+    /* Calculate and output the normalized similarity matrix
+    input: matrix, number of rows, number of columns, degree_matrix, similarity_matrix
+    output: matrix */
     int i, j;
     double* pre_sqrt = safe_malloc(rows * sizeof(double));
     for(i=0; i<rows; i++){
@@ -121,6 +127,7 @@ void compute_norm(double *matrix, int rows, int cols, double *degree_matrix, dou
 }
 
 void compute_HTH(double *HTH, int n, int k, double *H) {
+    /* Compute H^T * H, input: H, n = number of rows, k = number of columns, output: HTH */
     int i, j, l;
     for(i = 0; i < k; i++) {
         for(j = 0; j < k; j++) {
@@ -133,6 +140,7 @@ void compute_HTH(double *HTH, int n, int k, double *H) {
 }
 
 void compute_HHTH(double *HHTH, int n, int k, double *HTH, double *H) {
+    /* Compute H * (H^T * H), input: H, n = number of rows, k = number of columns, HTH = H^T * H, output: HHTH */
     int i, j, l;
     for(i = 0; i < n; i++) {
         for(j = 0; j < k; j++) {
@@ -145,6 +153,7 @@ void compute_HHTH(double *HHTH, int n, int k, double *HTH, double *H) {
 }
 
 void compute_WH(double *WH, int n, int k, double *W, double *H) {
+    /* Compute W * H, input: W, H, n = number of rows, k = number of columns, output: WH */
     int i, j, l;
     for(i = 0; i < n; i++) {
         for(j = 0; j < k; j++) {
@@ -157,6 +166,7 @@ void compute_WH(double *WH, int n, int k, double *W, double *H) {
 }
 
 double update_H(double *H, double *WH, double *HHTH, int n, int k) {
+    /* Update the H matrix, input: H, WH, HHTH, n = number of rows, k = number of columns, output: updated H */
     int i, j;
     double sum_diff = 0.0, tempH;
     for(i = 0; i < n; i++) {
@@ -174,8 +184,8 @@ double update_H(double *H, double *WH, double *HHTH, int n, int k) {
 }
 
 void compute_symnmf(int n, int k, double *W, double *H) {
-    /* Implement the logic for symmetric non-negative matrix factorization*/
-    /* Optimised for O(n*k^2)*/
+    /* Implement the logic for symmetric non-negative matrix factorization, Optimised for O(n*k^2)
+    n = number of rows, k = number of columns, W = input matrix, H = output matrix */
     int iter, it;
     double epsilon, sum_diff;
     double *HTH = (double*)safe_malloc(k * k * sizeof(double));
@@ -207,6 +217,7 @@ void compute_symnmf(int n, int k, double *W, double *H) {
 }
 
 void print_vectors(vector *head_vec, int rows, int cols) {
+    /* Print the vectors in the linked list, input: head_vec, number of rows, number of columns */
     vector *curr_vec = head_vec;
     cord *curr_cord;
     int i, j;
@@ -226,6 +237,7 @@ void print_vectors(vector *head_vec, int rows, int cols) {
 }
 
 void free_points(vector *head_vec) {
+    /* Free the linked list structures for vectors and coordinates, input: head_vec = vector to be freed*/
     vector *curr_vec = head_vec;
     while (curr_vec != NULL)
     {
@@ -237,6 +249,7 @@ void free_points(vector *head_vec) {
 
 
 void get_input(vector* head_vec, cord* head_cord, FILE* input_file, int* r_vec, int* c_vec){
+    /* Read the input file and populate the linked list structures for vectors and coordinates, also count rows and columns, input: input_file, output: head_vec, head_cord, r_vec = number of rows, c_vec = number of columns */
     cord *curr_cord;
     vector *curr_vec;
     double n;
@@ -278,6 +291,7 @@ void get_input(vector* head_vec, cord* head_cord, FILE* input_file, int* r_vec, 
 }
 
 int goals_logic(char* goal, int rows, int cols, vector *head_vec){
+    /* Input: goal, rows, cols, head_vec, output: 0 for success, 1 for error. gets the goal and processes the input accordingly */
     double *matrixA, *matrixD, *matrixW;
     matrixA = safe_malloc(rows * rows * sizeof(double));
     /* logic for the different goals*/
