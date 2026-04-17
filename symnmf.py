@@ -110,7 +110,6 @@ def read_points(file_name):
             except ValueError:
                 print("An Error Has Occurred")
                 sys.exit(1)
-            coard_float=float(coard)
             current_point.append(coard_float)
         points.append(current_point)
     return points
