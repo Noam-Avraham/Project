@@ -33,7 +33,7 @@ def kmeans_score_func(points, k):
         print("An Error Has Occurred")
         sys.exit(1)
     
-    centroids = kmeans.kmeans(k,0.0001,400, points)
+    centroids = kmeans.kmeans(k,0.0001,300, points)
     centroids = np.array(centroids)
     kmeans_labels = []
     #assign cluster to each point according to kmeans centroids results

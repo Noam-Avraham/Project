@@ -58,8 +58,7 @@ def main_function(points, k, goal):
         final_matrix=symnmf.norm(points, d, n)
    
     elif(goal == "symnmf"):
-        W=symnmf.norm(points, d, n)
-        
+        W=symnmf.norm(points, d, n) 
         start_H=initial_H(W,n,k)
         #sending to C symnmf()
         final_matrix=symnmf.symnmf(W,start_H,n,k)
@@ -76,6 +75,7 @@ def print_matrix(matrix):
         for x in range(len(row)):
             st.append('{0:.4f}'.format(row[x]))
         print(','.join(st))
+
 #calculate the initial H matrix.
 def initial_H(W,n,k):
     W_np = np.array(W)
@@ -85,7 +85,6 @@ def initial_H(W,n,k):
     H = np.random.uniform(0, upper_bound, size=(n, k))
     
     return H.tolist()
-
 
 #read all data points.
 def read_points(file_name):
@@ -114,7 +113,6 @@ def read_points(file_name):
         points.append(current_point)
     return points
 	
-
 if __name__ == "__main__":
     np.random.seed(1234)
     main()
