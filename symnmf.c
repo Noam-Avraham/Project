@@ -288,6 +288,7 @@ void get_input(vector* head_vec, cord* head_cord, FILE* input_file, int* r_vec, 
     }
     *r_vec = rows;
     *c_vec = cols;
+    free(head_cord);
 }
 
 int goals_logic(char* goal, int rows, int cols, vector *head_vec){
